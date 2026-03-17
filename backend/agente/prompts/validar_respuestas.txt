@@ -1,0 +1,32 @@
+Valida si las respuestas del usuario tienen sentido para abrir un negocio físico local en Barcelona.
+
+Devuelve SOLO un JSON válido:
+
+Si todo es válido:
+{"valido": true}
+
+Si hay algún problema:
+{
+  "valido": false,
+  "motivo": "online",        // "online" | "vago" | "incoherente"
+  "mensaje_usuario": "Texto explicativo amable para mostrar al usuario"
+}
+
+Motivos:
+- "online": el negocio no necesita local físico (dropshipping, app, blog, consultoría online...)
+- "vago": la respuesta sigue siendo demasiado vaga para trabajar con ella ("algo de comida", "no sé", "cosas")
+- "incoherente": combinación sin sentido (ticket 500€ + local de 20m², etc.)
+
+Ejemplos:
+
+INPUT: {"sector": "Cafetería", "precio": "Precio medio", "cliente_objetivo": "Adultos (30-50)"}
+OUTPUT: {"valido": true}
+
+INPUT: {"sector": "Vender cosas por internet", "precio": "Precio bajo"}
+OUTPUT: {"valido": false, "motivo": "online", "mensaje_usuario": "GeoRetail está pensado para negocios con local físico en Barcelona. Negocios online como tiendas por internet o servicios digitales no necesitan ubicación física y no podemos ayudarte con eso. ¿Tienes algún negocio presencial en mente?"}
+
+INPUT: {"sector": "Algo de comida", "precio": "no sé"}
+OUTPUT: {"valido": false, "motivo": "vago", "mensaje_usuario": "Tu respuesta es un poco general. ¿Puedes concretar un poco más? Por ejemplo: cafetería, restaurante de bocadillos, heladería, etc."}
+
+INPUT: {"sector": "Otro", "precio": "Precio bajo"}
+OUTPUT: {"valido": false, "motivo": "vago", "mensaje_usuario": "Has elegido 'Otro' como sector. ¿Puedes describir brevemente qué tipo de negocio tienes en mente?"}

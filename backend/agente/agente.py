@@ -21,6 +21,9 @@ PROMPT_SISTEMA          = _cargar_prompt("sistema.txt")
 PROMPT_EXTRACCION       = _cargar_prompt("extraccion_perfil.txt")
 PROMPT_EVALUACION       = _cargar_prompt("evaluacion_input.txt")
 PROMPT_PREGUNTAS        = _cargar_prompt("generar_preguntas.txt")
+PROMPT_VALIDAR          = _cargar_prompt("validar_respuestas.txt")
+
+MAX_REINTENTOS = 2
 
 # --- LLM ---
 llm = get_llm(temperature=0)
@@ -195,28 +198,107 @@ def procesar_busqueda(session_id: str, input_usuario: str) -> dict:
 # FUNCIÓN: procesar_respuestas_cuestionario
 # ---------------------------------------------------------------
 
+def validar_respuestas(respuestas: dict) -> dict:
+    """
+    Valida que las respuestas del cuestionario tengan sentido.
+    Devuelve {"valido": True} o {"valido": False, "motivo": ..., "mensaje_usuario": ...}
+    """
+    prompt = (
+        f"{PROMPT_VALIDAR}\n\n"
+        f"INPUT: {json.dumps(respuestas, ensure_ascii=False)}\n"
+        f"OUTPUT:"
+    )
+    respuesta = llm.invoke(prompt)
+    return _parsear_json(respuesta.content)
+
+def _detectar_campos_problematicos(respuestas: dict, motivo: str) -> list:
+    """
+    Según el motivo del fallo, devuelve los campos que hay que volver a preguntar.
+    """
+    if motivo == "vago":
+        # Devolver solo los campos con respuestas genéricas
+        campos = []
+        valores_vagos = {"otro", "otros", "no sé", "no se", "algo", "cosas", "varios"}
+        for campo, valor in respuestas.items():
+            if str(valor).lower().strip() in valores_vagos:
+                campos.append(campo)
+        return campos if campos else ["sector"]  # fallback
+
+    if motivo == "incoherente":
+        # Volver a preguntar precio y m² que suelen ser los que chocan
+        return ["precio", "m2"]
+
+    return ["sector"]  # fallback genérico
+
 def procesar_respuestas(session_id: str, respuestas: dict) -> dict:
     """
-    Recibe las respuestas del cuestionario, las combina con el input
-    original y extrae el perfil completo.
-
-    respuestas ejemplo:
-    {
-      "sector": "Cafetería",
-      "precio": "Precio medio",
-      "cliente_objetivo": "Adultos (30-50)"
-    }
+    Recibe las respuestas del cuestionario.
+    Valida que sean coherentes antes de extraer el perfil.
+    Si no son válidas, devuelve un nuevo cuestionario o un error claro.
     """
 
-    # Recuperar el input original de Redis
+    # 1. Validar las respuestas
+    try:
+        validacion = validar_respuestas(respuestas)
+    except Exception as e:
+        return {"ok": False, "error": f"Error validando respuestas: {str(e)}"}
+
+    if not validacion.get("valido"):
+        motivo = validacion.get("motivo")
+        mensaje = validacion.get("mensaje_usuario", "Algo no cuadra en tu respuesta.")
+
+        # Negocio online → error definitivo, no tiene sentido seguir preguntando
+        if motivo == "online":
+            return {
+                "ok": False,
+                "tipo": "error_definitivo",
+                "error": mensaje
+            }
+
+        # Respuesta vaga o incoherente → comprobar reintentos
+        sesion_reintentos = cargar_sesion(session_id, clave="reintentos")
+        reintentos = sesion_reintentos.get("count", 0) if sesion_reintentos else 0
+
+        if reintentos >= MAX_REINTENTOS:
+            return {
+                "ok": False,
+                "tipo": "error_definitivo",
+                "error": (
+                    "No hemos podido entender bien tu idea de negocio después de varios intentos. "
+                    "Intenta describir tu negocio de forma más concreta, por ejemplo: "
+                    "'cafetería de especialidad', 'barbería clásica', 'tienda de ropa sostenible'."
+                )
+            }
+
+        # Guardar reintento y devolver nuevo cuestionario
+        guardar_sesion(session_id, {"count": reintentos + 1}, clave="reintentos")
+
+        # Detectar qué campos siguen siendo problemáticos
+        campos_problematicos = _detectar_campos_problematicos(respuestas, motivo)
+        try:
+            cuestionario = generar_preguntas(campos_problematicos)
+        except Exception as e:
+            return {"ok": False, "error": f"Error generando preguntas: {str(e)}"}
+
+        return {
+            "ok": True,
+            "tipo": "cuestionario",
+            "session_id": session_id,
+            "mensaje": mensaje,  # mensaje explicativo del problema
+            "preguntas": cuestionario.get("preguntas", []),
+            "reintento": reintentos + 1,
+            "max_reintentos": MAX_REINTENTOS
+        }
+
+    # 2. Respuestas válidas → resetear reintentos y extraer perfil
+    guardar_sesion(session_id, {"count": 0}, clave="reintentos")
+
     datos_input = cargar_sesion(session_id, clave="input")
     input_original = datos_input.get("input_original", "") if datos_input else ""
 
-    # Combinar input original + respuestas en un texto enriquecido
     respuestas_texto = ", ".join([f"{k}: {v}" for k, v in respuestas.items()])
     input_combinado = f"{input_original}. Datos adicionales: {respuestas_texto}".strip(". ")
 
-    # Extraer perfil con la información completa
     try:
         perfil = extraer_perfil(input_combinado)
     except Exception as e:
@@ -224,7 +306,7 @@ def procesar_respuestas(session_id: str, respuestas: dict) -> dict:
 
     es_valido, mensaje_error = validar_negocio(perfil)
     if not es_valido:
-        return {"ok": False, "error": mensaje_error}
+        return {"ok": False, "tipo": "error_definitivo", "error": mensaje_error}
 
     guardar_sesion(session_id, perfil)
     descripcion = generar_respuesta_placeholder(perfil)
@@ -236,7 +318,6 @@ def procesar_respuestas(session_id: str, respuestas: dict) -> dict:
         "perfil": perfil,
         "descripcion": descripcion
     }
-
 
 # ---------------------------------------------------------------
 # FUNCIÓN: refinamiento conversacional (Fase 9)

@@ -1,6 +1,6 @@
 # GeoRetail — LLM Backend
 
-Módulo de IA del proyecto GeoRetail. Recibe la idea de negocio del usuario en lenguaje natural, extrae un perfil estructurado y gestiona el contexto de sesión para el refinamiento conversacional.
+Módulo de IA del proyecto GeoRetail. Recibe la idea de negocio del usuario en lenguaje natural, evalúa si la información es suficiente, lanza un cuestionario si falta algo, valida las respuestas y extrae un perfil estructurado listo para la búsqueda geoespacial.
 
 > ⚠️ Este repositorio contiene únicamente el backend LLM (Fases 1 y 2 del flujo completo de GeoRetail). Las fases de PostGIS, XGBoost y frontend están pendientes de integrar.
 
@@ -9,8 +9,11 @@ Módulo de IA del proyecto GeoRetail. Recibe la idea de negocio del usuario en l
 ## Qué hace este módulo
 
 - Recibe texto libre del usuario ("quiero abrir una barbería para hombres jóvenes...")
-- Llama a un LLM para extraer un perfil estructurado del negocio en JSON
-- Valida que el negocio sea un local físico (rechaza negocios online)
+- Evalúa si la información es suficiente para hacer una búsqueda
+- Si falta información → genera un cuestionario con preguntas relevantes
+- Valida las respuestas del cuestionario (detecta negocios online, respuestas vagas e incoherencias)
+- Si las respuestas no son válidas → reintenta el cuestionario hasta 2 veces con un mensaje explicativo
+- Si son válidas → extrae un perfil estructurado del negocio en JSON
 - Guarda el perfil en Redis como contexto de sesión
 - Permite refinamiento conversacional sin perder el contexto
 - Diseñado para cambiar de proveedor LLM (OpenAI / Anthropic / Ollama) tocando una línea en `.env`
@@ -21,19 +24,22 @@ Módulo de IA del proyecto GeoRetail. Recibe la idea de negocio del usuario en l
 
 ```
 georetail/
-├── docker-compose.yml          # PostgreSQL + Redis
+├── docker-compose.yml
 └── backend/
-    ├── .env                    # Variables de entorno (no subir a git)
+    ├── .env                          # Variables de entorno (no subir a git)
     ├── requirements.txt
-    ├── main.py                 # Entrada FastAPI
+    ├── main.py                       # Entrada FastAPI
     ├── api/
-    │   └── buscar.py           # Endpoints /buscar y /refinar
+    │   └── buscar.py                 # Endpoints /buscar, /responder y /refinar
     └── agente/
-        ├── llm_provider.py     # Wrapper multi-proveedor LLM
-        ├── agente.py           # Lógica principal del agente
+        ├── llm_provider.py           # Wrapper multi-proveedor LLM
+        ├── agente.py                 # Lógica principal del agente
         └── prompts/
-            ├── sistema.txt              # Prompt de sistema
-            └── extraccion_perfil.txt   # Few-shots para extracción de perfil
+            ├── sistema.txt               # Prompt de sistema
+            ├── extraccion_perfil.txt     # Few-shots para extraer perfil
+            ├── evaluacion_input.txt      # Evalúa si el input es suficiente
+            ├── generar_preguntas.txt     # Genera el cuestionario
+            └── validar_respuestas.txt    # Valida las respuestas del cuestionario
 ```
 
 ---
@@ -51,7 +57,7 @@ georetail/
 ### 1. Clona el repositorio
 
 ```bash
-git clone https://github.com/Dasbits/georetail-llm
+git clone https://github.com/tu-usuario/georetail-llm.git
 cd georetail-llm
 ```
 
@@ -116,11 +122,65 @@ INFO:     Application startup complete.
 
 ---
 
+## Flujo completo
+
+```
+POST /buscar  →  input del usuario
+                       │
+              [evaluar_input]
+                       │
+            ┌──────────┴──────────┐
+       suficiente             insuficiente
+            │                     │
+    [extraer_perfil]        [generar_preguntas]
+            │                     │
+       tipo: "perfil"        tipo: "cuestionario"
+            ✅                     │
+                         POST /responder
+                                   │
+                          [validar_respuestas]
+                                   │
+                  ┌────────────────┼────────────────┐
+               online           vago /          válido
+                  │           incoherente           │
+          error_definitivo         │         [extraer_perfil]
+                  ❌         ¿reintentos < 2?       │
+                              │          │      tipo: "perfil"
+                             SÍ          NO         ✅
+                              │          │
+                        [cuestionario  error_definitivo
+                         de nuevo con   tras 2 intentos]
+                         mensaje claro]      ❌
+```
+
+---
+
+## Endpoints disponibles
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | `/health` | Comprueba que la API está viva |
+| POST | `/buscar` | Evalúa el input y devuelve perfil o cuestionario |
+| POST | `/responder` | Valida las respuestas del cuestionario y devuelve perfil |
+| POST | `/refinar` | Refinamiento conversacional manteniendo el contexto de sesión |
+
+---
+
+## Tipos de respuesta
+
+Todos los endpoints devuelven un campo `tipo` que el frontend usa para saber qué renderizar:
+
+| `tipo` | Cuándo ocurre | Qué mostrar |
+|--------|--------------|-------------|
+| `perfil` | Input completo y válido | Mapa con resultados ✅ |
+| `cuestionario` | Falta información o respuesta inválida | Formulario con preguntas ⚠️ |
+| `error_definitivo` | Negocio online o 2 reintentos fallidos | Mensaje de error y limpiar ❌ |
+
+---
+
 ## Probar los endpoints
 
 ### Opción A — Swagger (sin instalar nada)
-
-Abre el navegador en:
 
 ```
 http://localhost:8000/docs
@@ -128,7 +188,9 @@ http://localhost:8000/docs
 
 ### Opción B — Thunder Client (extensión VS Code)
 
-**POST /buscar** — primera búsqueda
+---
+
+#### Caso 1 — Input completo, va directo al perfil
 
 ```
 POST http://localhost:8000/buscar
@@ -139,12 +201,13 @@ Content-Type: application/json
 }
 ```
 
-Respuesta esperada:
+Respuesta:
 
 ```json
 {
   "ok": true,
-  "session_id": "abc-123-...",
+  "tipo": "perfil",
+  "session_id": "abc-123",
   "perfil": {
     "sector": "barbería",
     "cliente_objetivo": { "edad": "18-35", "genero": "masculino", "renta": "media" },
@@ -158,31 +221,167 @@ Respuesta esperada:
 }
 ```
 
-**POST /refinar** — refinamiento conversacional (usa el session_id del paso anterior)
+---
+
+#### Caso 2 — Input pobre, genera cuestionario
+
+```
+POST http://localhost:8000/buscar
+Content-Type: application/json
+
+{
+  "input_usuario": "quiero abrir un negocio"
+}
+```
+
+Respuesta:
+
+```json
+{
+  "ok": true,
+  "tipo": "cuestionario",
+  "session_id": "abc-123",
+  "mensaje": "Necesito un poco más de información para encontrar la mejor ubicación.",
+  "preguntas": [
+    {
+      "id": "sector",
+      "pregunta": "¿Qué tipo de negocio quieres abrir?",
+      "tipo": "single_select",
+      "opciones": ["Cafetería", "Barbería / Peluquería", "Restaurante", "Tienda de ropa", "Gimnasio / Estudio", "Otro"]
+    },
+    {
+      "id": "cliente_objetivo",
+      "pregunta": "¿A quién va dirigido tu negocio?",
+      "tipo": "single_select",
+      "opciones": ["Jóvenes (18-30)", "Adultos (30-50)", "Familias", "Profesionales", "Turistas", "Mixto"]
+    },
+    {
+      "id": "precio",
+      "pregunta": "¿Qué nivel de precios tendrá tu negocio?",
+      "tipo": "single_select",
+      "opciones": ["Precio bajo (económico)", "Precio medio", "Precio alto (premium)"]
+    }
+  ]
+}
+```
+
+---
+
+#### Caso 2a — Respuestas válidas del cuestionario
+
+```
+POST http://localhost:8000/responder
+Content-Type: application/json
+
+{
+  "session_id": "abc-123",
+  "respuestas": {
+    "sector": "Cafetería",
+    "cliente_objetivo": "Adultos (30-50)",
+    "precio": "Precio medio"
+  }
+}
+```
+
+Respuesta:
+
+```json
+{
+  "ok": true,
+  "tipo": "perfil",
+  "session_id": "abc-123",
+  "perfil": { ... },
+  "descripcion": "..."
+}
+```
+
+---
+
+#### Caso 2b — Respuesta vaga, vuelve a preguntar
+
+```
+POST http://localhost:8000/responder
+Content-Type: application/json
+
+{
+  "session_id": "abc-123",
+  "respuestas": {
+    "sector": "Otro",
+    "precio": "no sé"
+  }
+}
+```
+
+Respuesta:
+
+```json
+{
+  "ok": true,
+  "tipo": "cuestionario",
+  "session_id": "abc-123",
+  "mensaje": "Tu respuesta es un poco general. ¿Puedes concretar un poco más?",
+  "preguntas": [ ... ],
+  "reintento": 1,
+  "max_reintentos": 2
+}
+```
+
+---
+
+#### Caso 2c — Negocio online, error definitivo
+
+```
+POST http://localhost:8000/responder
+Content-Type: application/json
+
+{
+  "session_id": "abc-123",
+  "respuestas": {
+    "sector": "Vender cosas por internet",
+    "precio": "Precio bajo"
+  }
+}
+```
+
+Respuesta:
+
+```json
+{
+  "ok": false,
+  "tipo": "error_definitivo",
+  "error": "GeoRetail está pensado para negocios con local físico en Barcelona. ¿Tienes algún negocio presencial en mente?"
+}
+```
+
+---
+
+#### Caso 3 — Refinamiento conversacional
 
 ```
 POST http://localhost:8000/refinar
 Content-Type: application/json
 
 {
-  "session_id": "abc-123-...",
+  "session_id": "abc-123",
   "mensaje": "¿hay zonas con alquiler más barato que mantengan buen flujo peatonal?"
 }
 ```
 
-### Opción C — curl (CMD)
+Respuesta:
 
-```bash
-curl -X POST http://localhost:8000/buscar ^
-  -H "Content-Type: application/json" ^
-  -d "{\"input_usuario\": \"quiero abrir una cafeteria en el centro\"}"
+```json
+{
+  "ok": true,
+  "session_id": "abc-123",
+  "respuesta": "Sí, barrios como Sant Antoni o el Poble Sec ofrecen..."
+}
 ```
 
 ---
 
 ## Cambiar de proveedor LLM
 
-Solo edita `backend/.env`:
+Solo edita `backend/.env`, el código no cambia nada:
 
 ```env
 # Usar Claude en vez de GPT
@@ -195,18 +394,6 @@ LLM_PROVIDER=ollama
 LLM_MODEL=llama3
 ```
 
-El resto del código no cambia nada.
-
----
-
-## Endpoints disponibles
-
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/health` | Comprueba que la API está viva |
-| POST | `/buscar` | Extrae perfil del negocio y devuelve recomendación inicial |
-| POST | `/refinar` | Refinamiento conversacional manteniendo el contexto de sesión |
-
 ---
 
 ## Errores comunes
@@ -217,7 +404,7 @@ El resto del código no cambia nada.
 | `OPENAI_API_KEY not set` | Falta el `.env` | Crea `backend/.env` con tu key |
 | `Module not found` | Venv no activado | `venv\Scripts\activate` (Windows) |
 | Puerto 8000 ocupado | Otro proceso usa el puerto | `uvicorn main:app --reload --port 8001` |
-| `JSONDecodeError` | El LLM devolvió texto extra | Revisa el prompt en `extraccion_perfil.txt` |
+| `JSONDecodeError` | El LLM devolvió texto extra | Revisa los prompts en `/agente/prompts/` |
 
 ---
 
@@ -226,7 +413,7 @@ El resto del código no cambia nada.
 | Fase | Descripción | Estado |
 |------|-------------|--------|
 | Fase 1 | Entrada del usuario | ✅ Hecho |
-| Fase 2 | Extracción de perfil con LLM | ✅ Hecho |
+| Fase 2 | Evaluación del input, cuestionario y extracción de perfil con LLM | ✅ Hecho |
 | Fase 3 | Consulta geoespacial PostGIS | 🔲 Pendiente |
 | Fase 4 | Scoring XGBoost | 🔲 Pendiente |
 | Fase 5 | NLP de reseñas | 🔲 Pendiente |
