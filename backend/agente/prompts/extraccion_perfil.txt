@@ -1,0 +1,32 @@
+Extrae un perfil estructurado del negocio a partir del texto del usuario.
+Devuelve SOLO un JSON válido, sin texto adicional, sin bloques de código.
+
+Campos del JSON:
+- sector: tipo de negocio (string)
+- cliente_objetivo: objeto con edad (rango string), genero (masculino/femenino/mixto), renta (baja/media/alta)
+- ticket_medio_min: precio mínimo por cliente en euros (integer)
+- ticket_medio_max: precio máximo por cliente en euros (integer)
+- m2_min: metros cuadrados mínimos necesarios (integer)
+- m2_max: metros cuadrados máximos (integer)
+- competencia_radio_metros: radio en metros para evitar competencia directa (integer, default 300)
+- variables_prioritarias: lista de strings con las variables más relevantes para este negocio
+  Valores posibles: flujo_peatonal, perfil_demografico, transporte, seguridad, competencia,
+  actividad_comercial, turismo, zonas_verdes, aparcamiento
+- es_negocio_local: true si necesita un local físico, false si es online o no aplica
+
+Ejemplos:
+
+INPUT: "quiero abrir una barbería para hombres jóvenes, precio asequible, zona céntrica"
+OUTPUT: {"sector":"barbería","cliente_objetivo":{"edad":"18-35","genero":"masculino","renta":"media"},"ticket_medio_min":15,"ticket_medio_max":25,"m2_min":40,"m2_max":80,"competencia_radio_metros":300,"variables_prioritarias":["flujo_peatonal","perfil_demografico","transporte"],"es_negocio_local":true}
+
+INPUT: "cafetería de especialidad, clientela adulta profesional, zona de oficinas"
+OUTPUT: {"sector":"cafetería","cliente_objetivo":{"edad":"25-50","genero":"mixto","renta":"media-alta"},"ticket_medio_min":4,"ticket_medio_max":10,"m2_min":60,"m2_max":120,"competencia_radio_metros":200,"variables_prioritarias":["flujo_peatonal","actividad_comercial","transporte"],"es_negocio_local":true}
+
+INPUT: "tienda de ropa deportiva, clientes jóvenes activos, precio medio"
+OUTPUT: {"sector":"tienda ropa deportiva","cliente_objetivo":{"edad":"18-40","genero":"mixto","renta":"media"},"ticket_medio_min":30,"ticket_medio_max":80,"m2_min":80,"m2_max":150,"competencia_radio_metros":500,"variables_prioritarias":["flujo_peatonal","perfil_demografico","aparcamiento"],"es_negocio_local":true}
+
+INPUT: "quiero montar una tienda online de ropa"
+OUTPUT: {"es_negocio_local":false}
+
+INPUT: "gimnasio boutique enfocado en yoga y pilates, mujeres 30-50 años, precio alto"
+OUTPUT: {"sector":"gimnasio boutique","cliente_objetivo":{"edad":"30-50","genero":"femenino","renta":"alta"},"ticket_medio_min":60,"ticket_medio_max":120,"m2_min":100,"m2_max":200,"competencia_radio_metros":500,"variables_prioritarias":["perfil_demografico","transporte","seguridad","zonas_verdes"],"es_negocio_local":true}

@@ -1,0 +1,51 @@
+# Entorno virtual
+venv/
+.venv/
+env/
+
+# Variables de entorno (¡nunca subas las keys!)
+.env
+.env.local
+.env.production
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ML / modelos entrenados (son muy pesados)
+*.pkl
+*.joblib
+ml/datos/raw/
+ml/datos/procesados/
+ml/datos/externos/
+
+# Jupyter Notebooks checkpoints
+.ipynb_checkpoints/
+
+# Logs
+*.log
+logs/
+
+# Docker volúmenes locales
+postgres_data/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Next.js (cuando lo montes)
+frontend/.next/
+frontend/node_modules/
+frontend/.env.local

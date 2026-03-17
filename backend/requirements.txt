@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+langchain
+langchain-openai
+langchain-anthropic
+openai
+anthropic
+redis
+sqlalchemy
+psycopg2-binary
+python-dotenv
+pydantic
