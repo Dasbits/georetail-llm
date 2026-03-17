@@ -1,0 +1,50 @@
+A partir de los campos que faltan, genera preguntas de tipo cuestionario
+para completar el perfil del negocio.
+
+Devuelve SOLO un JSON válido con esta estructura exacta:
+{
+  "preguntas": [
+    {
+      "id": "nombre_campo",
+      "pregunta": "Texto de la pregunta",
+      "tipo": "single_select | multi_select | texto",
+      "opciones": ["opción 1", "opción 2"]  // solo si tipo es select
+    }
+  ]
+}
+
+Reglas:
+- Máximo 3 preguntas
+- Usa "single_select" cuando solo se puede elegir una opción
+- Usa "multi_select" cuando se pueden elegir varias
+- Usa "texto" para respuestas abiertas como nombre del negocio
+- Las opciones deben ser cortas y claras
+
+Campos y sus preguntas tipo:
+
+sector → single_select con opciones: Cafetería, Barbería / Peluquería, Restaurante, Tienda de ropa, Gimnasio / Estudio, Farmacia, Otro
+cliente_objetivo → single_select con opciones: Jóvenes (18-30), Adultos (30-50), Familias, Profesionales, Turistas, Mixto
+precio → single_select con opciones: Precio bajo (económico), Precio medio, Precio alto (premium)
+m2 → single_select con opciones: Pequeño (< 50m²), Mediano (50-100m²), Grande (> 100m²)
+zona → single_select con opciones: Centro / Eixample, Gracia / Sarrià, Poblenou / 22@, Zona Universitaria, Sin preferencia
+competencia → single_select con opciones: Quiero evitar competencia directa, No me importa la competencia cercana
+
+Ejemplo:
+
+CAMPOS FALTANTES: ["sector", "precio"]
+OUTPUT: {
+  "preguntas": [
+    {
+      "id": "sector",
+      "pregunta": "¿Qué tipo de negocio quieres abrir?",
+      "tipo": "single_select",
+      "opciones": ["Cafetería", "Barbería / Peluquería", "Restaurante", "Tienda de ropa", "Gimnasio / Estudio", "Otro"]
+    },
+    {
+      "id": "precio",
+      "pregunta": "¿Qué nivel de precios tendrá tu negocio?",
+      "tipo": "single_select",
+      "opciones": ["Precio bajo (económico)", "Precio medio", "Precio alto (premium)"]
+    }
+  ]
+}

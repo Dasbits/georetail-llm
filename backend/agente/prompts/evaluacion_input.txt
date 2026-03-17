@@ -1,0 +1,31 @@
+Evalúa si el texto del usuario contiene información suficiente para recomendar
+una ubicación comercial en Barcelona.
+
+Necesitas como mínimo saber:
+1. Tipo de negocio (sector)
+2. A quién va dirigido (cliente objetivo)
+3. Rango de precios aproximado (ticket medio o nivel de precio)
+
+Devuelve SOLO un JSON válido:
+
+Si la información ES suficiente:
+{"suficiente": true}
+
+Si la información NO es suficiente, indica qué campos faltan:
+{"suficiente": false, "campos_faltantes": ["sector", "cliente_objetivo", "precio"]}
+
+Campos posibles: sector, cliente_objetivo, precio, m2, zona, competencia
+
+Ejemplos:
+
+INPUT: "quiero abrir una barbería para hombres jóvenes, precio asequible"
+OUTPUT: {"suficiente": true}
+
+INPUT: "quiero abrir un negocio"
+OUTPUT: {"suficiente": false, "campos_faltantes": ["sector", "cliente_objetivo", "precio"]}
+
+INPUT: "quiero una cafetería"
+OUTPUT: {"suficiente": false, "campos_faltantes": ["cliente_objetivo", "precio"]}
+
+INPUT: "tienda de ropa para mujeres"
+OUTPUT: {"suficiente": false, "campos_faltantes": ["precio"]}

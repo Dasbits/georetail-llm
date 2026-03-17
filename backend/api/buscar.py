@@ -1,17 +1,23 @@
 import uuid
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from agente.agente import procesar_busqueda, refinar_busqueda
+from agente.agente import (
+    procesar_busqueda,
+    procesar_respuestas,
+    refinar_busqueda
+)
 
 router = APIRouter()
 
 
-# --- Modelos de request ---
-
 class BusquedaRequest(BaseModel):
     input_usuario: str
     session_id: str | None = None
-    filtros: dict | None = None  # presupuesto, m2, barrio (opcional)
+
+
+class RespuestasRequest(BaseModel):
+    session_id: str
+    respuestas: dict  # {"sector": "Cafetería", "precio": "Precio medio", ...}
 
 
 class RefinamientoRequest(BaseModel):
@@ -19,17 +25,29 @@ class RefinamientoRequest(BaseModel):
     mensaje: str
 
 
-# --- Endpoints ---
-
 @router.post("/buscar")
 def buscar(req: BusquedaRequest):
     """
-    Recibe la idea del usuario en lenguaje natural y devuelve
-    el perfil extraído + descripción de zonas recomendadas.
+    Recibe el input del usuario.
+    - Si hay suficiente info → devuelve perfil + descripción (tipo: "perfil")
+    - Si falta info → devuelve cuestionario (tipo: "cuestionario")
     """
     session_id = req.session_id or str(uuid.uuid4())
-
     resultado = procesar_busqueda(session_id, req.input_usuario)
+
+    if not resultado.get("ok"):
+        raise HTTPException(status_code=400, detail=resultado.get("error"))
+
+    return resultado
+
+
+@router.post("/responder")
+def responder(req: RespuestasRequest):
+    """
+    Recibe las respuestas del cuestionario y completa el perfil.
+    Siempre devuelve tipo: "perfil" si va bien.
+    """
+    resultado = procesar_respuestas(req.session_id, req.respuestas)
 
     if not resultado.get("ok"):
         raise HTTPException(status_code=400, detail=resultado.get("error"))
@@ -40,8 +58,7 @@ def buscar(req: BusquedaRequest):
 @router.post("/refinar")
 def refinar(req: RefinamientoRequest):
     """
-    Permite al usuario afinar la búsqueda conversacionalmente
-    sin perder el contexto del negocio.
+    Refinamiento conversacional manteniendo el contexto de sesión.
     """
     resultado = refinar_busqueda(req.session_id, req.mensaje)
 
