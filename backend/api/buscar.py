@@ -1,11 +1,9 @@
 import uuid
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
-from agente.agente import (
-    procesar_busqueda,
-    procesar_respuestas,
-    refinar_busqueda
-)
+from agente.agente import procesar_busqueda, procesar_respuestas, refinar_busqueda
+from auth.dependencias import get_usuario_actual
+from db.modelos import Usuario
 
 router = APIRouter()
 
@@ -14,11 +12,9 @@ class BusquedaRequest(BaseModel):
     input_usuario: str
     session_id: str | None = None
 
-
 class RespuestasRequest(BaseModel):
     session_id: str
-    respuestas: dict  # {"sector": "Cafetería", "precio": "Precio medio", ...}
-
+    respuestas: dict
 
 class RefinamientoRequest(BaseModel):
     session_id: str
@@ -26,12 +22,10 @@ class RefinamientoRequest(BaseModel):
 
 
 @router.post("/buscar")
-def buscar(req: BusquedaRequest):
-    """
-    Recibe el input del usuario.
-    - Si hay suficiente info → devuelve perfil + descripción (tipo: "perfil")
-    - Si falta info → devuelve cuestionario (tipo: "cuestionario")
-    """
+def buscar(
+    req: BusquedaRequest,
+    usuario: Usuario = Depends(get_usuario_actual)  # ← protegido
+):
     session_id = req.session_id or str(uuid.uuid4())
     resultado = procesar_busqueda(session_id, req.input_usuario)
 
@@ -42,11 +36,10 @@ def buscar(req: BusquedaRequest):
 
 
 @router.post("/responder")
-def responder(req: RespuestasRequest):
-    """
-    Recibe las respuestas del cuestionario y completa el perfil.
-    Siempre devuelve tipo: "perfil" si va bien.
-    """
+def responder(
+    req: RespuestasRequest,
+    usuario: Usuario = Depends(get_usuario_actual)  # ← protegido
+):
     resultado = procesar_respuestas(req.session_id, req.respuestas)
 
     if not resultado.get("ok"):
@@ -56,10 +49,10 @@ def responder(req: RespuestasRequest):
 
 
 @router.post("/refinar")
-def refinar(req: RefinamientoRequest):
-    """
-    Refinamiento conversacional manteniendo el contexto de sesión.
-    """
+def refinar(
+    req: RefinamientoRequest,
+    usuario: Usuario = Depends(get_usuario_actual)  # ← protegido
+):
     resultado = refinar_busqueda(req.session_id, req.mensaje)
 
     if not resultado.get("ok"):

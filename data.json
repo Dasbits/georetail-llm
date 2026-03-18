@@ -1,0 +1,692 @@
+[
+    {
+        "id": 1,
+        "titulo": "Local comercial en Calle de Leiva",
+        "barrio": "Sants",
+        "precio_mes_eur": 1516,
+        "superficie_m2": 169,
+        "precio_m2": 8.97,
+        "caracteristicas": [
+            "A pie de calle",
+            "Uso mixto: comercial/oficina"
+        ],
+        "url_referencia": "https://www.idealista.com/geo/alquiler-locales/centro-ciudad/"
+    },
+    {
+        "id": 2,
+        "titulo": "Espacio en Calle de Berga, 22",
+        "barrio": "Vila de Gràcia",
+        "precio_mes_eur": 2400,
+        "superficie_m2": 157,
+        "precio_m2": 15.29,
+        "caracteristicas": [
+            "Junto al Mercat de la Llibertat",
+            "Alta demanda"
+        ],
+        "url_referencia": "https://www.idealista.com/geo/alquiler-locales/centro-ciudad/"
+    },
+    {
+        "id": 3,
+        "titulo": "Local en Via Augusta, 143",
+        "barrio": "Sant Gervasi - Galvany",
+        "precio_mes_eur": 3890,
+        "superficie_m2": 222,
+        "precio_m2": 17.52,
+        "caracteristicas": [
+            "Zona exclusiva",
+            "A pie de calle"
+        ],
+        "url_referencia": "https://www.idealista.com/geo/alquiler-locales/zona-alta-1/"
+    },
+    {
+        "id": 4,
+        "titulo": "Local en Calle de Provença",
+        "barrio": "La Nova Esquerra de l'Eixample",
+        "precio_mes_eur": 1400,
+        "superficie_m2": 80,
+        "precio_m2": 17.50,
+        "caracteristicas": [
+            "Entre Viladomat y Calàbria",
+            "Escaparate"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona-provincia/"
+    },
+    {
+        "id": 5,
+        "titulo": "Local en Calle del Carme",
+        "barrio": "El Raval",
+        "precio_mes_eur": 1900,
+        "superficie_m2": 43,
+        "precio_m2": 44.19,
+        "caracteristicas": [
+            "Cerca de la Boqueria",
+            "Muy transitado"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona-barcelona/"
+    },
+    {
+        "id": 6,
+        "titulo": "Local en Rambla de Catalunya, 85",
+        "barrio": "La Dreta de l'Eixample",
+        "precio_mes_eur": 7500,
+        "superficie_m2": 50,
+        "precio_m2": 150.00,
+        "caracteristicas": [
+            "Zona Prime",
+            "Flujo constante de peatones"
+        ],
+        "url_referencia": "https://www.idealista.com/geo/alquiler-locales/rambla-catalunya-barcelona-barcelona/"
+    },
+    {
+        "id": 7,
+        "titulo": "Local en Calle de Badajoz",
+        "barrio": "El Poblenou (22@)",
+        "precio_mes_eur": 10584,
+        "superficie_m2": 441,
+        "precio_m2": 24.00,
+        "caracteristicas": [
+            "Distrito tecnológico",
+            "Techos altos"
+        ],
+        "url_referencia": "https://www.idealista.com/geo/alquiler-locales/22/"
+    },
+    {
+        "id": 8,
+        "titulo": "Local en Calle del Consell de Cent",
+        "barrio": "Eixample Esquerra",
+        "precio_mes_eur": 1190,
+        "superficie_m2": 109,
+        "precio_m2": 10.92,
+        "caracteristicas": [
+            "Zona semi-peatonal",
+            "Planta baja con altillo"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona-barcelona/"
+    },
+    {
+        "id": 9,
+        "titulo": "Local en Calle de la Princesa",
+        "barrio": "El Born",
+        "precio_mes_eur": 5500,
+        "superficie_m2": 329,
+        "precio_m2": 16.72,
+        "caracteristicas": [
+            "Junto al Parque de la Ciutadella",
+            "Planta única"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona/ciutat-vella/sant-pere-santa-caterina-i-la-ribera/"
+    },
+    {
+        "id": 10,
+        "titulo": "Local en Paseo de Garcia Fària",
+        "barrio": "Diagonal Mar",
+        "precio_mes_eur": 5000,
+        "superficie_m2": 125,
+        "precio_m2": 40.00,
+        "caracteristicas": [
+            "Primera línea de mar",
+            "25m de fachada"
+        ],
+        "url_referencia": "https://www.idealista.com/geo/alquiler-locales/22/"
+    },
+    {
+        "id": 11,
+        "titulo": "Local en Calle de Ferran, 15",
+        "barrio": "Gòtic",
+        "precio_mes_eur": 6200,
+        "superficie_m2": 85,
+        "precio_m2": 72.94,
+        "caracteristicas": [
+            "Zona de alto paso turístico",
+            "Fachada acristalada",
+            "Salida de humos"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona/ciutat-vella/el-gotic/"
+    },
+    {
+        "id": 12,
+        "titulo": "Espacio Diáfano en Calle de Pujades",
+        "barrio": "Poblenou",
+        "precio_mes_eur": 3200,
+        "superficie_m2": 210,
+        "precio_m2": 15.23,
+        "caracteristicas": [
+            "Estilo industrial",
+            "Techos de 4 metros",
+            "Cerca de metro Bogatell"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona/sant-marti/el-poblenou/"
+    },
+    {
+        "id": 13,
+        "titulo": "Local comercial en Calle de Sants",
+        "barrio": "Sants - Badal",
+        "precio_mes_eur": 1250,
+        "superficie_m2": 95,
+        "precio_m2": 13.15,
+        "caracteristicas": [
+            "Eje comercial consolidado",
+            "Sótano de almacenamiento",
+            "Persiana motorizada"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona/sants-montjuic/sants-badal/"
+    },
+    {
+        "id": 14,
+        "titulo": "Local en Gran Via de les Corts Catalanes",
+        "barrio": "Sant Martí - La Verneda",
+        "precio_mes_eur": 850,
+        "superficie_m2": 65,
+        "precio_m2": 13.07,
+        "caracteristicas": [
+            "Reformado recientemente",
+            "Ideal para oficina o estética",
+            "Escaparate pequeño"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona/sant-marti/la-verneda-i-la-pau/"
+    },
+    {
+        "id": 15,
+        "titulo": "Emblemático local en Calle de Muntaner",
+        "barrio": "Sant Gervasi - Galvany",
+        "precio_mes_eur": 4800,
+        "superficie_m2": 180,
+        "precio_m2": 26.66,
+        "caracteristicas": [
+            "Dos plantas",
+            "Zona de alto poder adquisitivo",
+            "Aire acondicionado central"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona/sarria-sant-gervasi/"
+    },
+    {
+        "id": 16,
+        "titulo": "Local en Calle de Mandri",
+        "barrio": "Bonanova",
+        "precio_mes_eur": 2100,
+        "superficie_m2": 70,
+        "precio_m2": 30.00,
+        "caracteristicas": [
+            "Esquina con gran visibilidad",
+            "Zona residencial premium",
+            "Apto para cafetería"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona/sarria-sant-gervasi/sant-gervasi-la-bonanova/"
+    },
+    {
+        "id": 17,
+        "titulo": "Local en Paseo de Valldaura",
+        "barrio": "Nou Barris",
+        "precio_mes_eur": 950,
+        "superficie_m2": 110,
+        "precio_m2": 8.63,
+        "caracteristicas": [
+            "Amplia fachada",
+            "Anteriormente entidad bancaria",
+            "Accesibilidad minusválidos"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona/nou-barris/"
+    },
+    {
+        "id": 18,
+        "titulo": "Local en Calle de Balmes",
+        "barrio": "Eixample Dreta",
+        "precio_mes_eur": 5900,
+        "superficie_m2": 250,
+        "precio_m2": 23.60,
+        "caracteristicas": [
+            "Cerca de Pl. Catalunya",
+            "Gran almacén en altillo",
+            "Puerta de seguridad"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona/eixample/la-dreta-de-l-eixample/"
+    },
+    {
+        "id": 19,
+        "titulo": "Local en Calle de la Riera Alta",
+        "barrio": "El Raval",
+        "precio_mes_eur": 1100,
+        "superficie_m2": 55,
+        "precio_m2": 20.00,
+        "caracteristicas": [
+            "Paredes de piedra vista",
+            "Ideal para galería de arte",
+            "Cerca de MACBA"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona/ciutat-vella/el-raval/"
+    },
+    {
+        "id": 20,
+        "titulo": "Nave comercial en Calle de Santander",
+        "barrio": "Sant Andreu",
+        "precio_mes_eur": 4500,
+        "superficie_m2": 600,
+        "precio_m2": 7.50,
+        "caracteristicas": [
+            "Entrada para camiones",
+            "Patio delantero",
+            "Estructura ignifugada"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona/sant-andreu/"
+    },
+    {
+        "id": 21,
+        "titulo": "Local en Calle de Verdi",
+        "barrio": "Vila de Gràcia",
+        "precio_mes_eur": 1650,
+        "superficie_m2": 75,
+        "precio_m2": 22.00,
+        "caracteristicas": [
+            "Eje peatonal",
+            "Techos con bovedilla catalana",
+            "Fachada de madera"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona/gracia/vila-de-gracia/"
+    },
+    {
+        "id": 22,
+        "titulo": "Local en Avenida de Josep Tarradellas",
+        "barrio": "Sants - Estació",
+        "precio_mes_eur": 3400,
+        "superficie_m2": 190,
+        "precio_m2": 17.89,
+        "caracteristicas": [
+            "Gran visibilidad",
+            "Cerca de estación de Sants",
+            "Fachada acristalada"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona/sants-montjuic/"
+    },
+    {
+        "id": 23,
+        "titulo": "Local en Calle de Numància",
+        "barrio": "Les Corts",
+        "precio_mes_eur": 2800,
+        "superficie_m2": 140,
+        "precio_m2": 20.00,
+        "caracteristicas": [
+            "Zona de oficinas",
+            "Salida de humos instalada",
+            "Terraza posible"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona/les-corts/"
+    },
+    {
+        "id": 24,
+        "titulo": "Local en Calle de Tuset",
+        "barrio": "Sant Gervasi - Galvany",
+        "precio_mes_eur": 8200,
+        "superficie_m2": 210,
+        "precio_m2": 39.04,
+        "caracteristicas": [
+            "Zona de ocio nocturno y oficinas",
+            "Dos niveles",
+            "Acabados de lujo"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona/sarria-sant-gervasi/sant-gervasi-galvany/"
+    },
+    {
+        "id": 25,
+        "titulo": "Local en Paseo Maragall",
+        "barrio": "Horta - Guinardó",
+        "precio_mes_eur": 1300,
+        "superficie_m2": 120,
+        "precio_m2": 10.83,
+        "caracteristicas": [
+            "Local esquinero",
+            "Mucha luz natural",
+            "Anteriormente farmacia"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona/horta-guinardo/"
+    },
+    {
+        "id": 26,
+        "titulo": "Local en Calle de la Marina",
+        "barrio": "El Fort Pienc",
+        "precio_mes_eur": 1950,
+        "superficie_m2": 100,
+        "precio_m2": 19.50,
+        "caracteristicas": [
+            "Cerca de Sagrada Familia",
+            "Gran escaparate",
+            "Zona turística"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona/eixample/el-fort-pienc/"
+    },
+    {
+        "id": 27,
+        "titulo": "Local en Calle de Balmes (Parte alta)",
+        "barrio": "Sant Gervasi - La Bonanova",
+        "precio_mes_eur": 2250,
+        "superficie_m2": 90,
+        "precio_m2": 25.00,
+        "caracteristicas": [
+            "Junto a Plaza Kennedy",
+            "Reformado",
+            "Ideal para clínica"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona/sarria-sant-gervasi/"
+    },
+    {
+        "id": 28,
+        "titulo": "Local comercial en Calle de Blai",
+        "barrio": "Poble Sec",
+        "precio_mes_eur": 2100,
+        "superficie_m2": 65,
+        "precio_m2": 32.30,
+        "caracteristicas": [
+            "Calle de las tapas",
+            "Licencia C3",
+            "Pequeño almacén"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona/sants-montjuic/el-poble-sec/"
+    },
+    {
+        "id": 29,
+        "titulo": "Local en Calle de Roger de Llúria",
+        "barrio": "Eixample Dreta",
+        "precio_mes_eur": 4100,
+        "superficie_m2": 160,
+        "precio_m2": 25.62,
+        "caracteristicas": [
+            "Finca regia",
+            "Techos altos con molduras",
+            "Patio interior"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona/eixample/la-dreta-de-l-eixample/"
+    },
+    {
+        "id": 30,
+        "titulo": "Local en Gran Via de Carles III",
+        "barrio": "Pedralbes / Les Corts",
+        "precio_mes_eur": 5500,
+        "superficie_m2": 300,
+        "precio_m2": 18.33,
+        "caracteristicas": [
+            "Cerca de El Corte Inglés",
+            "Planta baja diáfana",
+            "Gran fachada"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona/les-corts/pedralbes/"
+    },
+    {
+        "id": 31,
+        "titulo": "Local en Calle de Ausias March",
+        "barrio": "La Dreta de l'Eixample",
+        "precio_mes_eur": 5500,
+        "superficie_m2": 446,
+        "precio_m2": 12.33,
+        "caracteristicas": [
+            "Finca catalogada",
+            "3 escaparates",
+            "Dos plantas"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona-barcelona/"
+    },
+    {
+        "id": 32,
+        "titulo": "Local en Calle de la Princesa (Picasso)",
+        "barrio": "El Born",
+        "precio_mes_eur": 1700,
+        "superficie_m2": 132,
+        "precio_m2": 12.88,
+        "caracteristicas": [
+            "Junto Museo Picasso",
+            "Techos muy altos",
+            "Zona almacén"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona-barcelona/"
+    },
+    {
+        "id": 33,
+        "titulo": "Local en Calle de l'Arc del Teatre",
+        "barrio": "El Raval",
+        "precio_mes_eur": 3250,
+        "superficie_m2": 494,
+        "precio_m2": 6.58,
+        "caracteristicas": [
+            "Edificio moderno",
+            "Gran superficie",
+            "Ideal oficinas/showroom"
+        ],
+        "url_referencia": "https://www.idealista.com/geo/alquiler-locales/centro-ciudad/"
+    },
+    {
+        "id": 34,
+        "titulo": "Local en Calle de Còrsega, 401",
+        "barrio": "Vila de Gràcia / Eixample",
+        "precio_mes_eur": 1899,
+        "superficie_m2": 98,
+        "precio_m2": 19.38,
+        "caracteristicas": [
+            "Zona consolidada",
+            "Mucho tránsito residente",
+            "A pie de calle"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona-barcelona/"
+    },
+    {
+        "id": 35,
+        "titulo": "Local en Calle de Badajoz (22@)",
+        "barrio": "Poblenou",
+        "precio_mes_eur": 10584,
+        "superficie_m2": 441,
+        "precio_m2": 24.00,
+        "caracteristicas": [
+            "Edificio exclusivo oficinas",
+            "Vigilancia 24h",
+            "Zonas ajardinadas"
+        ],
+        "url_referencia": "https://www.idealista.com/geo/alquiler-locales/22/"
+    },
+    {
+        "id": 36,
+        "titulo": "Local en Calle del Doctor Trueta",
+        "barrio": "Poblenou",
+        "precio_mes_eur": 1700,
+        "superficie_m2": 58,
+        "precio_m2": 29.31,
+        "caracteristicas": [
+            "Corazón del 22@",
+            "Ideal start-up o estudio",
+            "Mucha afluencia profesional"
+        ],
+        "url_referencia": "https://www.idealista.com/geo/alquiler-locales/22/"
+    },
+    {
+        "id": 37,
+        "titulo": "Local en Calle de Vilapicina",
+        "barrio": "Nou Barris",
+        "precio_mes_eur": 1300,
+        "superficie_m2": 130,
+        "precio_m2": 10.00,
+        "caracteristicas": [
+            "Patio trasero de 133m",
+            "Techos 2.90m",
+            "Bien comunicado"
+        ],
+        "url_referencia": "https://www.api.cat/es/alquiler/locales/barcelona/barcelona/zona-nou-barris"
+    },
+    {
+        "id": 38,
+        "titulo": "Local en Calle de l'Artesania",
+        "barrio": "Nou Barris (Montbau)",
+        "precio_mes_eur": 1200,
+        "superficie_m2": 79,
+        "precio_m2": 15.19,
+        "caracteristicas": [
+            "Esquinero",
+            "Puertas automáticas",
+            "Muy luminoso"
+        ],
+        "url_referencia": "https://www.api.cat/es/alquiler/locales/barcelona/barcelona/zona-nou-barris"
+    },
+    {
+        "id": 39,
+        "titulo": "Local en Gran Via de les Corts Catalanes",
+        "barrio": "Sant Martí (Bac de Roda)",
+        "precio_mes_eur": 2950,
+        "superficie_m2": 275,
+        "precio_m2": 10.73,
+        "caracteristicas": [
+            "Sótano y altillo",
+            "Planta baja diáfana",
+            "Eje comercial"
+        ],
+        "url_referencia": "https://www.idealista.com/geo/alquiler-locales/22/"
+    },
+    {
+        "id": 40,
+        "titulo": "Local en Calle de la Riera d'Horta",
+        "barrio": "Horta",
+        "precio_mes_eur": 1200,
+        "superficie_m2": 145,
+        "precio_m2": 8.27,
+        "caracteristicas": [
+            "Apto para restauración",
+            "Terraza privada",
+            "Cerca metro"
+        ],
+        "url_referencia": "https://www.api.cat/es/alquiler/locales/barcelona/barcelona/zona-nou-barris"
+    },
+    {
+        "id": 41,
+        "titulo": "Local en Calle de Sant Antoni",
+        "barrio": "Vila de Gràcia",
+        "precio_mes_eur": 1612,
+        "superficie_m2": 101,
+        "precio_m2": 15.96,
+        "caracteristicas": [
+            "Estudio nuevo a estrenar",
+            "Patio de 36m",
+            "4 estancias"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona-provincia/"
+    },
+    {
+        "id": 42,
+        "titulo": "Local en Calle del Torrent de l'Olla",
+        "barrio": "Vila de Gràcia",
+        "precio_mes_eur": 1350,
+        "superficie_m2": 115,
+        "precio_m2": 11.74,
+        "caracteristicas": [
+            "Recepción entrada 20m",
+            "Fondo comercial",
+            "Zona muy activa"
+        ],
+        "url_referencia": "https://www.idealista.com/geo/alquiler-locales/centro-ciudad/"
+    },
+    {
+        "id": 43,
+        "titulo": "Local en Calle de Valencia",
+        "barrio": "Eixample Esquerra",
+        "precio_mes_eur": 2100,
+        "superficie_m2": 120,
+        "precio_m2": 17.50,
+        "caracteristicas": [
+            "Cerca Enrique Granados",
+            "Fachada de cristal",
+            "Aire acondicionado"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona-barcelona/"
+    },
+    {
+        "id": 44,
+        "titulo": "Local en Calle de Fabra i Puig",
+        "barrio": "Sant Andreu",
+        "precio_mes_eur": 1800,
+        "superficie_m2": 150,
+        "precio_m2": 12.00,
+        "caracteristicas": [
+            "Eje comercial Fabra i Puig",
+            "Gran escaparate",
+            "Diáfano"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona-barcelona/"
+    },
+    {
+        "id": 45,
+        "titulo": "Local en Paseo de San Juan",
+        "barrio": "Dreta de l'Eixample",
+        "precio_mes_eur": 3900,
+        "superficie_m2": 165,
+        "precio_m2": 23.63,
+        "caracteristicas": [
+            "Zona de moda",
+            "Techos altos",
+            "Apto hostelería sin salida humos"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona-barcelona/"
+    },
+    {
+        "id": 46,
+        "titulo": "Local en Calle de la Marina",
+        "barrio": "Poblenou",
+        "precio_mes_eur": 2447,
+        "superficie_m2": 95,
+        "precio_m2": 25.76,
+        "caracteristicas": [
+            "Licencia platos preparados A6.1",
+            "Totalmente equipado",
+            "Ideal delivery"
+        ],
+        "url_referencia": "https://www.idealista.com/geo/alquiler-locales/22/"
+    },
+    {
+        "id": 47,
+        "titulo": "Local en Calle de Rogent",
+        "barrio": "El Camp de l'Arpa",
+        "precio_mes_eur": 1550,
+        "superficie_m2": 85,
+        "precio_m2": 18.23,
+        "caracteristicas": [
+            "Calle peatonal",
+            "Gran flujo de gente",
+            "Fachada clásica"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona-barcelona/"
+    },
+    {
+        "id": 48,
+        "titulo": "Local en Rambla de Prim",
+        "barrio": "Besòs",
+        "precio_mes_eur": 900,
+        "superficie_m2": 110,
+        "precio_m2": 8.18,
+        "caracteristicas": [
+            "Frente al Tram",
+            "Zona de paso",
+            "Local reformado"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona-barcelona/"
+    },
+    {
+        "id": 49,
+        "titulo": "Local en Paseo de la Zona Franca",
+        "barrio": "Sants-Montjuïc",
+        "precio_mes_eur": 2600,
+        "superficie_m2": 200,
+        "precio_m2": 13.00,
+        "caracteristicas": [
+            "Gran superficie",
+            "Muelle de carga pequeño",
+            "Zona logística/oficina"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona-barcelona/"
+    },
+    {
+        "id": 50,
+        "titulo": "Local en Rambla de la Boqueria",
+        "barrio": "Gòtic",
+        "precio_mes_eur": 9500,
+        "superficie_m2": 480,
+        "precio_m2": 19.79,
+        "caracteristicas": [
+            "Exclusivo",
+            "Terrazas de 482m",
+            "Frente mercado Boqueria"
+        ],
+        "url_referencia": "https://www.idealista.com/alquiler-locales/barcelona-barcelona/con-salida-de-humos/"
+    }
+]

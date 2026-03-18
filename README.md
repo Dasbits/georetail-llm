@@ -1,6 +1,6 @@
 # GeoRetail — LLM Backend
 
-Módulo de IA del proyecto GeoRetail. Recibe la idea de negocio del usuario en lenguaje natural, evalúa si la información es suficiente, lanza un cuestionario si falta algo, valida las respuestas y extrae un perfil estructurado listo para la búsqueda geoespacial.
+Módulo de IA del proyecto GeoRetail. Recibe la idea de negocio del usuario en lenguaje natural, evalúa si la información es suficiente, lanza un cuestionario si falta algo, valida las respuestas y extrae un perfil estructurado listo para la búsqueda geoespacial. Incluye autenticación con JWT.
 
 > ⚠️ Este repositorio contiene únicamente el backend LLM (Fases 1 y 2 del flujo completo de GeoRetail). Las fases de PostGIS, XGBoost y frontend están pendientes de integrar.
 
@@ -8,6 +8,8 @@ Módulo de IA del proyecto GeoRetail. Recibe la idea de negocio del usuario en l
 
 ## Qué hace este módulo
 
+- Registro y login de usuarios con JWT
+- Protección de todos los endpoints con token Bearer
 - Recibe texto libre del usuario ("quiero abrir una barbería para hombres jóvenes...")
 - Evalúa si la información es suficiente para hacer una búsqueda
 - Si falta información → genera un cuestionario con preguntas relevantes
@@ -25,29 +27,38 @@ Módulo de IA del proyecto GeoRetail. Recibe la idea de negocio del usuario en l
 ```
 georetail/
 ├── docker-compose.yml
+├── database/
+│   └── init.sql                      # Esquema inicial de la BD
 └── backend/
+    ├── Dockerfile
     ├── .env                          # Variables de entorno (no subir a git)
     ├── requirements.txt
     ├── main.py                       # Entrada FastAPI
     ├── api/
-    │   └── buscar.py                 # Endpoints /buscar, /responder y /refinar
+    │   ├── auth.py                   # Endpoints /auth/register, /auth/login, /auth/me
+    │   └── buscar.py                 # Endpoints /buscar, /responder, /refinar (protegidos)
+    ├── auth/
+    │   ├── jwt.py                    # Generación y verificación de tokens JWT
+    │   └── dependencias.py           # Dependencia get_usuario_actual
+    ├── db/
+    │   ├── conexion.py               # Pool de conexiones SQLAlchemy
+    │   └── modelos.py                # Modelos ORM
     └── agente/
         ├── llm_provider.py           # Wrapper multi-proveedor LLM
         ├── agente.py                 # Lógica principal del agente
         └── prompts/
-            ├── sistema.txt               # Prompt de sistema
-            ├── extraccion_perfil.txt     # Few-shots para extraer perfil
-            ├── evaluacion_input.txt      # Evalúa si el input es suficiente
-            ├── generar_preguntas.txt     # Genera el cuestionario
-            └── validar_respuestas.txt    # Valida las respuestas del cuestionario
+            ├── sistema.txt
+            ├── extraccion_perfil.txt
+            ├── evaluacion_input.txt
+            ├── generar_preguntas.txt
+            └── validar_respuestas.txt
 ```
 
 ---
 
 ## Requisitos previos
 
-- Python 3.11+
-- Docker Desktop
+- Docker Desktop (es todo lo que necesitas para levantar el proyecto)
 - Una API key de OpenAI (o Anthropic si prefieres Claude)
 
 ---
@@ -63,112 +74,125 @@ cd georetail-llm
 
 ### 2. Configura las variables de entorno
 
-Crea el fichero `backend/.env` con este contenido:
+Crea el fichero `backend/.env`:
 
 ```env
-# Proveedor activo: openai | anthropic | ollama
+# Proveedor LLM: openai | anthropic | ollama
 LLM_PROVIDER=openai
 LLM_MODEL=gpt-4o
-
-# Keys (solo necesitas la del proveedor activo)
 OPENAI_API_KEY=sk-...
 # ANTHROPIC_API_KEY=sk-ant-...
 
-# Servicios
-REDIS_URL=redis://localhost:6379
-DATABASE_URL=postgresql://georetail:georetail123@localhost:5432/georetail
+# JWT — genera un secret seguro con: python -c "import secrets; print(secrets.token_hex(32))"
+JWT_SECRET=cambia_esto_por_una_clave_larga_y_aleatoria
+JWT_ALGORITHM=HS256
+JWT_EXPIRE_MINUTES=1440
 ```
 
-### 3. Levanta Redis y PostgreSQL con Docker
+> Las variables `REDIS_URL` y `DATABASE_URL` las inyecta el `docker-compose.yml` automáticamente. No hace falta ponerlas en el `.env`.
+
+### 3. Levanta todo con Docker
 
 ```bash
 docker compose up -d
 ```
 
-Verifica que están corriendo:
+La primera vez construye la imagen del backend, las siguientes es instantáneo.
+
+Comprueba que todo está corriendo:
 
 ```bash
 docker compose ps
 ```
 
-### 4. Crea el entorno virtual e instala dependencias
+Logs del backend en tiempo real:
 
 ```bash
-cd backend
-
-# Windows
-python -m venv venv
-venv\Scripts\activate
-
-# Mac / Linux
-python -m venv venv
-source venv/bin/activate
-
-pip install -r requirements.txt
+docker compose logs -f backend
 ```
 
-### 5. Arranca la API
+### 4. Comandos útiles
 
 ```bash
-uvicorn main:app --reload --port 8000
-```
+# Parar todo
+docker compose down
 
-Cuando veas esto, todo está funcionando:
+# Parar y borrar la base de datos (fuerza re-ejecución del init.sql)
+docker compose down -v
 
-```
-INFO:     Uvicorn running on http://127.0.0.1:8000
-INFO:     Application startup complete.
+# Reconstruir tras cambiar requirements.txt o Dockerfile
+docker compose up -d --build
 ```
 
 ---
 
-## Flujo completo
+## Flujo completo de la aplicación
 
 ```
+Register / Login  →  JWT token
+                          │
+              Authorization: Bearer <token>
+                          │
 POST /buscar  →  input del usuario
-                       │
-              [evaluar_input]
-                       │
-            ┌──────────┴──────────┐
-       suficiente             insuficiente
-            │                     │
-    [extraer_perfil]        [generar_preguntas]
-            │                     │
-       tipo: "perfil"        tipo: "cuestionario"
-            ✅                     │
-                         POST /responder
-                                   │
-                          [validar_respuestas]
-                                   │
-                  ┌────────────────┼────────────────┐
-               online           vago /          válido
-                  │           incoherente           │
-          error_definitivo         │         [extraer_perfil]
-                  ❌         ¿reintentos < 2?       │
-                              │          │      tipo: "perfil"
-                             SÍ          NO         ✅
-                              │          │
-                        [cuestionario  error_definitivo
-                         de nuevo con   tras 2 intentos]
-                         mensaje claro]      ❌
+                          │
+                 [evaluar_input]
+                          │
+            ┌─────────────┴─────────────┐
+       suficiente                  insuficiente
+            │                           │
+    [extraer_perfil]          [generar_preguntas]
+            │                           │
+       tipo: "perfil"           tipo: "cuestionario"
+            ✅                           │
+                              POST /responder
+                                         │
+                               [validar_respuestas]
+                                         │
+                      ┌──────────────────┼──────────────────┐
+                   online             vago /             válido
+                      │            incoherente               │
+              error_definitivo           │           [extraer_perfil]
+                      ❌          ¿reintentos < 2?            │
+                                  │            │         tipo: "perfil"
+                                 SÍ            NO              ✅
+                                  │            │
+                           [cuestionario   error_definitivo
+                            de nuevo con    tras 2 intentos]
+                            mensaje claro]       ❌
 ```
 
 ---
 
 ## Endpoints disponibles
 
+### Autenticación (sin token)
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| POST | `/auth/register` | Crea una cuenta nueva y devuelve token |
+| POST | `/auth/login` | Login con email y contraseña, devuelve token |
+| GET | `/auth/me` | Devuelve los datos del usuario autenticado |
+
+### Búsqueda (requieren token Bearer)
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| POST | `/buscar` | Evalúa el input y devuelve perfil o cuestionario |
+| POST | `/responder` | Valida las respuestas del cuestionario |
+| POST | `/refinar` | Refinamiento conversacional con contexto de sesión |
+
+### Utilidades
+
 | Método | Ruta | Descripción |
 |--------|------|-------------|
 | GET | `/health` | Comprueba que la API está viva |
-| POST | `/buscar` | Evalúa el input y devuelve perfil o cuestionario |
-| POST | `/responder` | Valida las respuestas del cuestionario y devuelve perfil |
-| POST | `/refinar` | Refinamiento conversacional manteniendo el contexto de sesión |
+| GET | `/docs` | Swagger con todos los endpoints |
 
 ---
 
 ## Tipos de respuesta
 
-Todos los endpoints devuelven un campo `tipo` que el frontend usa para saber qué renderizar:
+El campo `tipo` indica al frontend qué renderizar:
 
 | `tipo` | Cuándo ocurre | Qué mostrar |
 |--------|--------------|-------------|
@@ -178,22 +202,80 @@ Todos los endpoints devuelven un campo `tipo` que el frontend usa para saber qu�
 
 ---
 
-## Probar los endpoints
+## Probar con Thunder Client
 
-### Opción A — Swagger (sin instalar nada)
+### Paso 0 — Comprobar que la API está viva
 
 ```
-http://localhost:8000/docs
+GET http://localhost:8000/health
 ```
 
-### Opción B — Thunder Client (extensión VS Code)
+Respuesta esperada: `{"status": "ok"}`
 
 ---
 
-#### Caso 1 — Input completo, va directo al perfil
+### Paso 1 — Register
+
+```
+POST http://localhost:8000/auth/register
+Content-Type: application/json
+
+{
+  "email": "test@georetail.com",
+  "password": "mipassword123",
+  "nombre": "Test"
+}
+```
+
+Respuesta:
+
+```json
+{
+  "access_token": "eyJ...",
+  "token_type": "bearer",
+  "usuario": {
+    "id": "uuid...",
+    "email": "test@georetail.com",
+    "nombre": "Test"
+  }
+}
+```
+
+👉 Guarda el `access_token`. Lo necesitas en todos los siguientes pasos.
+
+---
+
+### Paso 2 — Login (para las siguientes veces)
+
+```
+POST http://localhost:8000/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@georetail.com",
+  "password": "mipassword123"
+}
+```
+
+---
+
+### Cómo añadir el token en Thunder Client
+
+En cada petición protegida ve a la pestaña **Auth → Bearer Token** y pega el token. O en **Headers**:
+
+```
+Authorization: Bearer <tu_token>
+```
+
+Sin token → `401 Unauthorized`. Con token → respuesta normal.
+
+---
+
+### Escenario A — Input completo, va directo al perfil
 
 ```
 POST http://localhost:8000/buscar
+Authorization: Bearer <token>
 Content-Type: application/json
 
 {
@@ -201,80 +283,33 @@ Content-Type: application/json
 }
 ```
 
-Respuesta:
-
-```json
-{
-  "ok": true,
-  "tipo": "perfil",
-  "session_id": "abc-123",
-  "perfil": {
-    "sector": "barbería",
-    "cliente_objetivo": { "edad": "18-35", "genero": "masculino", "renta": "media" },
-    "ticket_medio_min": 15,
-    "ticket_medio_max": 25,
-    "m2_min": 40,
-    "m2_max": 80,
-    "es_negocio_local": true
-  },
-  "descripcion": "Para una barbería orientada a hombres jóvenes..."
-}
-```
+Respuesta esperada: `tipo: "perfil"` directo. ✅
 
 ---
 
-#### Caso 2 — Input pobre, genera cuestionario
+### Escenario B — Input pobre, cuestionario y respuestas válidas
 
+**Paso 1:**
 ```
 POST http://localhost:8000/buscar
-Content-Type: application/json
+Authorization: Bearer <token>
 
 {
   "input_usuario": "quiero abrir un negocio"
 }
 ```
 
-Respuesta:
+Respuesta esperada: `tipo: "cuestionario"` con preguntas.
 
-```json
-{
-  "ok": true,
-  "tipo": "cuestionario",
-  "session_id": "abc-123",
-  "mensaje": "Necesito un poco más de información para encontrar la mejor ubicación.",
-  "preguntas": [
-    {
-      "id": "sector",
-      "pregunta": "¿Qué tipo de negocio quieres abrir?",
-      "tipo": "single_select",
-      "opciones": ["Cafetería", "Barbería / Peluquería", "Restaurante", "Tienda de ropa", "Gimnasio / Estudio", "Otro"]
-    },
-    {
-      "id": "cliente_objetivo",
-      "pregunta": "¿A quién va dirigido tu negocio?",
-      "tipo": "single_select",
-      "opciones": ["Jóvenes (18-30)", "Adultos (30-50)", "Familias", "Profesionales", "Turistas", "Mixto"]
-    },
-    {
-      "id": "precio",
-      "pregunta": "¿Qué nivel de precios tendrá tu negocio?",
-      "tipo": "single_select",
-      "opciones": ["Precio bajo (económico)", "Precio medio", "Precio alto (premium)"]
-    }
-  ]
-}
-```
+👉 Copia el `session_id` de la respuesta.
 
----
-
-#### Caso 2a — Respuestas válidas del cuestionario
-
+**Paso 2:**
 ```
 POST http://localhost:8000/responder
-Content-Type: application/json
+Authorization: Bearer <token>
 
 {
-  "session_id": "abc-123",
+  "session_id": "PEGA_AQUI_EL_SESSION_ID",
   "respuestas": {
     "sector": "Cafetería",
     "cliente_objetivo": "Adultos (30-50)",
@@ -283,59 +318,79 @@ Content-Type: application/json
 }
 ```
 
-Respuesta:
-
-```json
-{
-  "ok": true,
-  "tipo": "perfil",
-  "session_id": "abc-123",
-  "perfil": { ... },
-  "descripcion": "..."
-}
-```
+Respuesta esperada: `tipo: "perfil"`. ✅
 
 ---
 
-#### Caso 2b — Respuesta vaga, vuelve a preguntar
+### Escenario C — Respuesta vaga, reintento y corrección
 
+**Paso 1:**
 ```
-POST http://localhost:8000/responder
-Content-Type: application/json
+POST http://localhost:8000/buscar
+Authorization: Bearer <token>
 
 {
-  "session_id": "abc-123",
+  "input_usuario": "quiero montar algo"
+}
+```
+
+👉 Copia el `session_id`.
+
+**Paso 2 — respuesta vaga a propósito:**
+```
+POST http://localhost:8000/responder
+Authorization: Bearer <token>
+
+{
+  "session_id": "PEGA_AQUI_EL_SESSION_ID",
   "respuestas": {
     "sector": "Otro",
-    "precio": "no sé"
+    "cliente_objetivo": "no sé",
+    "precio": "Precio medio"
   }
 }
 ```
 
-Respuesta:
+Respuesta esperada: `tipo: "cuestionario"` con `"reintento": 1` y mensaje explicativo. ⚠️
 
-```json
+**Paso 3 — respuesta correcta:**
+```
+POST http://localhost:8000/responder
+Authorization: Bearer <token>
+
 {
-  "ok": true,
-  "tipo": "cuestionario",
-  "session_id": "abc-123",
-  "mensaje": "Tu respuesta es un poco general. ¿Puedes concretar un poco más?",
-  "preguntas": [ ... ],
-  "reintento": 1,
-  "max_reintentos": 2
+  "session_id": "PEGA_AQUI_EL_SESSION_ID",
+  "respuestas": {
+    "sector": "Restaurante",
+    "cliente_objetivo": "Familias",
+    "precio": "Precio medio"
+  }
 }
 ```
 
+Respuesta esperada: `tipo: "perfil"`. ✅
+
 ---
 
-#### Caso 2c — Negocio online, error definitivo
+### Escenario D — Negocio online, error definitivo
 
+**Paso 1:**
 ```
-POST http://localhost:8000/responder
-Content-Type: application/json
+POST http://localhost:8000/buscar
+Authorization: Bearer <token>
 
 {
-  "session_id": "abc-123",
+  "input_usuario": "quiero montar algo"
+}
+```
+
+**Paso 2:**
+```
+POST http://localhost:8000/responder
+Authorization: Bearer <token>
+
+{
+  "session_id": "PEGA_AQUI_EL_SESSION_ID",
   "respuestas": {
     "sector": "Vender cosas por internet",
     "precio": "Precio bajo"
@@ -343,39 +398,39 @@ Content-Type: application/json
 }
 ```
 
-Respuesta:
-
-```json
-{
-  "ok": false,
-  "tipo": "error_definitivo",
-  "error": "GeoRetail está pensado para negocios con local físico en Barcelona. ¿Tienes algún negocio presencial en mente?"
-}
-```
+Respuesta esperada: `ok: false`, `tipo: "error_definitivo"`. ❌
 
 ---
 
-#### Caso 3 — Refinamiento conversacional
+### Escenario E — Refinamiento conversacional
+
+Usa el `session_id` de cualquier escenario anterior que haya devuelto `tipo: "perfil"` (TTL de Redis: 1 hora).
 
 ```
 POST http://localhost:8000/refinar
-Content-Type: application/json
+Authorization: Bearer <token>
 
 {
-  "session_id": "abc-123",
+  "session_id": "PEGA_AQUI_EL_SESSION_ID",
   "mensaje": "¿hay zonas con alquiler más barato que mantengan buen flujo peatonal?"
 }
 ```
 
-Respuesta:
+Respuesta esperada: texto en español con contexto del negocio. ✅
 
-```json
-{
-  "ok": true,
-  "session_id": "abc-123",
-  "respuesta": "Sí, barrios como Sant Antoni o el Poble Sec ofrecen..."
-}
-```
+---
+
+### Resumen de qué comprobar en cada escenario
+
+| Escenario | Campo a mirar | Valor esperado |
+|-----------|--------------|----------------|
+| A | `tipo` | `perfil` |
+| B paso 1 | `tipo` | `cuestionario` |
+| B paso 2 | `tipo` | `perfil` |
+| C paso 2 | `tipo` + `reintento` | `cuestionario` + `1` |
+| C paso 3 | `tipo` | `perfil` |
+| D paso 2 | `ok` + `tipo` | `false` + `error_definitivo` |
+| E | `respuesta` | Texto en español con contexto |
 
 ---
 
@@ -400,11 +455,12 @@ LLM_MODEL=llama3
 
 | Error | Causa | Solución |
 |-------|-------|----------|
+| `401 Unauthorized` | Token ausente o expirado | Haz login de nuevo y usa el nuevo token |
+| `400 Already exists` | Email ya registrado | Usa otro email o ve directo a `/auth/login` |
 | `Connection refused :6379` | Docker no está corriendo | `docker compose up -d` |
 | `OPENAI_API_KEY not set` | Falta el `.env` | Crea `backend/.env` con tu key |
-| `Module not found` | Venv no activado | `venv\Scripts\activate` (Windows) |
-| Puerto 8000 ocupado | Otro proceso usa el puerto | `uvicorn main:app --reload --port 8001` |
 | `JSONDecodeError` | El LLM devolvió texto extra | Revisa los prompts en `/agente/prompts/` |
+| Puerto 8000 ocupado | Otro proceso usa el puerto | Cambia el puerto en `docker-compose.yml` |
 
 ---
 
@@ -412,8 +468,9 @@ LLM_MODEL=llama3
 
 | Fase | Descripción | Estado |
 |------|-------------|--------|
+| Auth | Registro, login y protección JWT | ✅ Hecho |
 | Fase 1 | Entrada del usuario | ✅ Hecho |
-| Fase 2 | Evaluación del input, cuestionario y extracción de perfil con LLM | ✅ Hecho |
+| Fase 2 | Evaluación, cuestionario y extracción de perfil | ✅ Hecho |
 | Fase 3 | Consulta geoespacial PostGIS | 🔲 Pendiente |
 | Fase 4 | Scoring XGBoost | 🔲 Pendiente |
 | Fase 5 | NLP de reseñas | 🔲 Pendiente |
